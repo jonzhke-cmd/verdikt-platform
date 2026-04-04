@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --verdikt-bg: #0A0F1E;
+  --verdikt-card: #111827;
+  --verdikt-border: #1F2937;
+  --verdikt-blue: #3B82F6;
+  --verdikt-yes: #22C55E;
+  --verdikt-no: #EF4444;
+  --verdikt-text: #ffffff;
+  --verdikt-muted: #94A3B8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--verdikt-bg);
+  color: var(--verdikt-text);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--verdikt-card);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--verdikt-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+/* Gradient utilities */
+.gradient-mesh {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 60%),
+    #0A0F1E;
+}
+
+.grid-pattern {
+  background-image:
+    linear-gradient(rgba(31, 41, 55, 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(31, 41, 55, 0.4) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Card hover effects */
+.market-card {
+  transition: all 0.2s ease;
+  border: 1px solid var(--verdikt-border);
+}
+
+.market-card:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(59, 130, 246, 0.1);
+}
+
+/* Button transitions */
+button, a {
+  transition: all 0.15s ease;
+}
+
+/* Price bar animations */
+.price-bar-inner {
+  transition: width 0.3s ease;
+}
+
+/* Recharts customization */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgba(31, 41, 55, 0.8) !important;
+}
+
+.recharts-text {
+  fill: #94A3B8 !important;
+}
