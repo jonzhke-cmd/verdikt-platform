@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
+import { SessionProvider } from 'next-auth/react'
+import { AuthProvider } from '@/contexts/AuthContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -42,8 +44,10 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body className="bg-verdikt-bg text-white min-h-screen flex flex-col">
-        {/* Navigation */}
-        <nav className="sticky top-0 z-50 border-b border-verdikt-border bg-verdikt-bg/90 backdrop-blur-md">
+        <SessionProvider>
+          <AuthProvider>
+            {/* Navigation */}
+            <nav className="sticky top-0 z-50 border-b border-verdikt-border bg-verdikt-bg/90 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               {/* Logo */}
@@ -96,8 +100,10 @@ export default function RootLayout({
           {children}
         </main>
 
-        {/* Footer */}
-        <footer className="border-t border-verdikt-border bg-verdikt-card mt-auto">
+            </main>
+
+            {/* Footer */}
+            <footer className="border-t border-verdikt-border bg-verdikt-card mt-auto">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               {/* Brand */}
@@ -146,6 +152,8 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
+          </AuthProvider>
+        </SessionProvider>
       </body>
     </html>
   )
