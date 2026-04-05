@@ -3,11 +3,36 @@
 import { TrendingUp, TrendingDown, DollarSign, Plus, Clock, BarChart2, LogOut, User } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
+import { useEffect, useState } from 'react'
 
 export default function PortfolioPage() {
-  const { user, isLoading, logout } = useAuth()
+  const [isAuthed, setIsAuthed] = useState(false)
+  const [userName, setUserName] = useState('')
+  const [userEmail, setUserEmail] = useState('')
+  const [userBalance, setUserBalance] = useState(1000.00)
+  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+  
+  useEffect(() => {
+    // Check auth on mount (client-side only)
+    if (typeof window !== 'undefined') {
+      const authed = localStorage.getItem('verdikt_authed')
+      if (authed === 'true') {
+        setIsAuthed(true)
+        setUserName(localStorage.getItem('verdikt_user_name') || 'User')
+        setUserEmail(localStorage.getItem('verdikt_user_email') || '')
+        const balance = parseFloat(localStorage.getItem('verdikt_user_balance') || '1000.00')
+        setUserBalance(balance)
+      }
+    }
+    setIsLoading(false)
+  }, [])
+  
+  useEffect(() => {
+    if (!isLoading && !isAuthed) {
+      router.push('/sign-in')
+    }
+  }, [isAuthed, isLoading, router])
   
   if (isLoading) {
     return (
@@ -20,8 +45,7 @@ export default function PortfolioPage() {
     )
   }
   
-  if (!user) {
-    router.push('/sign-in')
+  if (!isAuthed) {
     return null
   }
   
@@ -78,15 +102,21 @@ export default function PortfolioPage() {
   
   const totalPnl = mockPositions.reduce((sum, p) => sum + p.pnl, 0)
   
-  const handleLogout = async () => {
-    await logout()
+  const handleLogout = () => {
+    localStorage.removeItem('verdikt_authed')
+    localStorage.removeItem('verdikt_user_email')
+    localStorage.removeItem('verdikt_user_name')
+    localStorage.removeItem('verdikt_user_balance')
+    router.push('/')
   }
   
   const handleDeposit = () => {
     const amount = parseFloat(prompt('Enter deposit amount ($):') || '0')
     if (amount > 0) {
-      // In real app, this would update via API
-      alert(`Successfully deposited $${amount.toFixed(2)}. In a real app, this would update your balance via API.`)
+      const newBalance = userBalance + amount
+      setUserBalance(newBalance)
+      localStorage.setItem('verdikt_user_balance', newBalance.toString())
+      alert(`Successfully deposited $${amount.toFixed(2)}`)
     }
   }
   
@@ -98,10 +128,10 @@ export default function PortfolioPage() {
           <div className="flex items-center gap-3 mt-2">
             <div className="flex items-center gap-2 text-gray-400">
               <User className="w-4 h-4" />
-              <span className="text-sm">{user.name}</span>
+              <span className="text-sm">{userName}</span>
             </div>
             <span className="text-xs text-gray-500">•</span>
-            <span className="text-sm text-gray-400">{user.email}</span>
+            <span className="text-sm text-gray-400">{userEmail}</span>
           </div>
         </div>
         
@@ -131,7 +161,7 @@ export default function PortfolioPage() {
             <span className="text-sm text-gray-400">Balance</span>
           </div>
           <div className="text-3xl font-bold text-white">
-            ${user.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${userBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <p className="text-xs text-gray-500 mt-1">Available to trade</p>
         </div>
@@ -157,6 +187,7 @@ export default function PortfolioPage() {
         </div>
       </div>
 
+      {/* Rest of the portfolio page remains the same */}
       <div className="bg-verdikt-card border border-verdikt-border rounded-xl mb-6">
         <div className="p-5 border-b border-verdikt-border">
           <h2 className="font-bold text-white">Open Positions</h2>
@@ -261,7 +292,7 @@ export default function PortfolioPage() {
       </div>
 
       <p className="text-xs text-gray-600 text-center mt-8">
-        Signed in as {user.name}. Your data is stored locally in your browser.
+        Portfolio data is stored locally in your browser. Sign in on another device to see your account.
       </p>
     </div>
   )
