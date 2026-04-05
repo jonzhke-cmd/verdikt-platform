@@ -14,13 +14,15 @@ export default function MobileNav() {
 
   useEffect(() => {
     setMounted(true);
-    // Check for user on mount
-    const storedUser = localStorage.getItem('verdikt_user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        localStorage.removeItem('verdikt_user');
+    // Check for user on mount (client-side only)
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('verdikt_user');
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (e) {
+          localStorage.removeItem('verdikt_user');
+        }
       }
     }
   }, []);
