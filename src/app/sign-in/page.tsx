@@ -1,7 +1,52 @@
+'use client'
+
 import Link from 'next/link'
-import { Mail, Lock, ArrowRight } from 'lucide-react'
+import { Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react'
+import { useState } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
 
 export default function SignInPage() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSignUp, setIsSignUp] = useState(false)
+  const [name, setName] = useState('')
+  
+  const { login, signup } = useAuth()
+  const router = useRouter()
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setIsLoading(true)
+    
+    try {
+      let result
+      
+      if (isSignUp) {
+        if (!name.trim()) {
+          setError('Name is required')
+          return
+        }
+        result = await signup(email, password, name)
+      } else {
+        result = await login(email, password)
+      }
+      
+      if (result.success) {
+        router.push('/portfolio')
+      } else {
+        setError(result.error || 'Authentication failed')
+      }
+    } catch (err) {
+      setError('An unexpected error occurred')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+  
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12">
       {/* Background glow */}
@@ -26,7 +71,9 @@ export default function SignInPage() {
             <span className="text-xl font-bold text-white">VERDIKT</span>
           </Link>
           <h1 className="text-2xl font-bold text-white">Welcome to Verdikt</h1>
-          <p className="text-gray-400 mt-2 text-sm">Sign in to start trading prediction markets</p>
+          <p className="text-gray-400 mt-2 text-sm">
+            {isSignUp ? 'Create an account to start trading' : 'Sign in to start trading prediction markets'}
+          </p>
         </div>
 
         {/* Card */}
@@ -49,8 +96,34 @@ export default function SignInPage() {
             <div className="flex-1 h-px bg-verdikt-border" />
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-red-400">{error}</p>
+            </div>
+          )}
+
           {/* Form */}
-          <form className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Name (Sign Up only) */}
+            {isSignUp && (
+              <div>
+                <label className="block text-sm text-gray-400 mb-1.5" htmlFor="name">
+                  Full Name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="John Doe"
+                  className="w-full px-4 py-3 bg-verdikt-bg border border-verdikt-border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-verdikt-blue transition-colors"
+                  disabled={isLoading}
+                />
+              </div>
+            )}
+
             {/* Email */}
             <div>
               <label className="block text-sm text-gray-400 mb-1.5" htmlFor="email">
@@ -61,9 +134,13 @@ export default function SignInPage() {
                 <input
                   id="email"
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   autoComplete="email"
                   className="w-full pl-10 pr-4 py-3 bg-verdikt-bg border border-verdikt-border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-verdikt-blue transition-colors"
+                  disabled={isLoading}
+                  required
                 />
               </div>
             </div>
@@ -74,38 +151,63 @@ export default function SignInPage() {
                 <label className="block text-sm text-gray-400" htmlFor="password">
                   Password
                 </label>
-                <Link href="#" className="text-xs text-verdikt-blue hover:text-blue-400 transition-colors">
-                  Forgot password?
-                </Link>
+                {!isSignUp && (
+                  <Link href="#" className="text-xs text-verdikt-blue hover:text-blue-400 transition-colors">
+                    Forgot password?
+                  </Link>
+                )}
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                 <input
                   id="password"
                   type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  autoComplete="current-password"
+                  autoComplete={isSignUp ? "new-password" : "current-password"}
                   className="w-full pl-10 pr-4 py-3 bg-verdikt-bg border border-verdikt-border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-verdikt-blue transition-colors"
+                  disabled={isLoading}
+                  required
                 />
               </div>
+              {isSignUp && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Demo password: <code className="bg-gray-800 px-1 py-0.5 rounded">demo123</code>
+                </p>
+              )}
             </div>
 
-            {/* Sign In Button */}
+            {/* Submit Button */}
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-verdikt-blue text-white font-bold hover:bg-blue-500 transition-colors shadow-lg shadow-blue-500/20 mt-2"
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-verdikt-blue text-white font-bold hover:bg-blue-500 transition-colors shadow-lg shadow-blue-500/20 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
-              <ArrowRight className="w-4 h-4" />
+              {isLoading ? (
+                'Processing...'
+              ) : (
+                <>
+                  {isSignUp ? 'Create Account' : 'Sign In'}
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </form>
 
-          {/* Sign Up Link */}
+          {/* Toggle Sign Up/Sign In */}
           <p className="text-center text-sm text-gray-400 mt-6">
-            Don&apos;t have an account?{' '}
-            <Link href="#" className="text-verdikt-blue hover:text-blue-400 font-semibold transition-colors">
-              Sign up free
-            </Link>
+            {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
+            <button
+              type="button"
+              onClick={() => {
+                setIsSignUp(!isSignUp)
+                setError('')
+              }}
+              className="text-verdikt-blue hover:text-blue-400 font-semibold transition-colors"
+            >
+              {isSignUp ? 'Sign in' : 'Sign up free'}
+            </button>
           </p>
         </div>
 
