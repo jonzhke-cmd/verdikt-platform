@@ -21,46 +21,69 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+const MOCK_USERS_KEY = 'verdikt_mock_users'
+const CURRENT_USER_KEY = 'verdikt_current_user'
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check for stored user on mount (client-side only)
+    // Check for stored user on mount
     if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('verdikt_current_user')
+      const storedUser = localStorage.getItem(CURRENT_USER_KEY)
       if (storedUser) {
         try {
           setUser(JSON.parse(storedUser))
         } catch (e) {
-          localStorage.removeItem('verdikt_current_user')
+          localStorage.removeItem(CURRENT_USER_KEY)
         }
       }
     }
     setIsLoading(false)
   }, [])
 
+  const getMockUsers = (): Record<string, User> => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(MOCK_USERS_KEY)
+      if (stored) {
+        try {
+          return JSON.parse(stored)
+        } catch (e) {
+          return {}
+        }
+      }
+    }
+    return {}
+  }
+
+  const saveMockUsers = (users: Record<string, User>) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(MOCK_USERS_KEY, JSON.stringify(users))
+    }
+  }
+
   const login = async (email: string, password: string) => {
     setIsLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 500))
+      // Simple mock auth - in real app, this would be an API call
+      await new Promise(resolve => setTimeout(resolve, 500)) // Simulate network delay
       
-      // Simple mock auth
+      const users = getMockUsers()
+      const user = Object.values(users).find(u => u.email === email)
+      
+      if (!user) {
+        return { success: false, error: 'User not found' }
+      }
+      
+      // Simple password check (in real app, use proper hashing)
       if (password !== 'demo123') {
         return { success: false, error: 'Invalid password' }
       }
       
-      const mockUser: User = {
-        id: `user_${Date.now()}`,
-        email,
-        name: email.split('@')[0],
-        balance: 1000.00,
-        createdAt: new Date().toISOString()
-      }
-      
-      setUser(mockUser)
+      setUser(user)
       if (typeof window !== 'undefined') {
-        localStorage.setItem('verdikt_current_user', JSON.stringify(mockUser))
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user))
       }
       return { success: true }
     } catch (error) {
@@ -75,17 +98,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await new Promise(resolve => setTimeout(resolve, 500))
       
+      const users = getMockUsers()
+      
+      // Check if user exists
+      if (Object.values(users).some(u => u.email === email)) {
+        return { success: false, error: 'Email already registered' }
+      }
+      
       const newUser: User = {
         id: `user_${Date.now()}`,
         email,
         name,
-        balance: 1000.00,
+        balance: 1000.00, // Starting balance
         createdAt: new Date().toISOString()
       }
       
+      users[newUser.id] = newUser
+      saveMockUsers(users)
+      
       setUser(newUser)
       if (typeof window !== 'undefined') {
-        localStorage.setItem('verdikt_current_user', JSON.stringify(newUser))
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser))
       }
       return { success: true }
     } catch (error) {
@@ -98,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null)
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('verdikt_current_user')
+      localStorage.removeItem(CURRENT_USER_KEY)
     }
   }
 
@@ -107,7 +140,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const updatedUser = { ...user, balance: user.balance + amount }
       setUser(updatedUser)
       if (typeof window !== 'undefined') {
-        localStorage.setItem('verdikt_current_user', JSON.stringify(updatedUser))
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser))
+        
+        // Also update in users storage
+        const users = getMockUsers()
+        users[user.id] = updatedUser
+        saveMockUsers(users)
       }
     }
   }
