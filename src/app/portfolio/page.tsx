@@ -5,39 +5,34 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-interface User {
-  id: string
-  email: string
-  name: string
-  balance: number
-  createdAt: string
-}
-
 export default function PortfolioPage() {
-  const [user, setUser] = useState<User | null>(null)
+  const [isAuthed, setIsAuthed] = useState(false)
+  const [userName, setUserName] = useState('')
+  const [userEmail, setUserEmail] = useState('')
+  const [userBalance, setUserBalance] = useState(1000.00)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
   
   useEffect(() => {
-    // Check for stored user on mount (client-side only)
+    // Check auth on mount (client-side only)
     if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('verdikt_user')
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser))
-        } catch (e) {
-          localStorage.removeItem('verdikt_user')
-        }
+      const authed = localStorage.getItem('verdikt_authed')
+      if (authed === 'true') {
+        setIsAuthed(true)
+        setUserName(localStorage.getItem('verdikt_user_name') || 'User')
+        setUserEmail(localStorage.getItem('verdikt_user_email') || '')
+        const balance = parseFloat(localStorage.getItem('verdikt_user_balance') || '1000.00')
+        setUserBalance(balance)
       }
     }
     setIsLoading(false)
   }, [])
   
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isLoading && !isAuthed) {
       router.push('/sign-in')
     }
-  }, [user, isLoading, router])
+  }, [isAuthed, isLoading, router])
   
   if (isLoading) {
     return (
@@ -50,7 +45,7 @@ export default function PortfolioPage() {
     )
   }
   
-  if (!user) {
+  if (!isAuthed) {
     return null
   }
   
@@ -108,29 +103,20 @@ export default function PortfolioPage() {
   const totalPnl = mockPositions.reduce((sum, p) => sum + p.pnl, 0)
   
   const handleLogout = () => {
-    localStorage.removeItem('verdikt_user')
+    localStorage.removeItem('verdikt_authed')
+    localStorage.removeItem('verdikt_user_email')
+    localStorage.removeItem('verdikt_user_name')
+    localStorage.removeItem('verdikt_user_balance')
     router.push('/')
   }
   
   const handleDeposit = () => {
     const amount = parseFloat(prompt('Enter deposit amount ($):') || '0')
     if (amount > 0) {
-      const updatedUser = { ...user, balance: user.balance + amount }
-      setUser(updatedUser)
-      localStorage.setItem('verdikt_user', JSON.stringify(updatedUser))
+      const newBalance = userBalance + amount
+      setUserBalance(newBalance)
+      localStorage.setItem('verdikt_user_balance', newBalance.toString())
       alert(`Successfully deposited $${amount.toFixed(2)}`)
-    }
-  }
-  
-  const handleWithdraw = () => {
-    const amount = parseFloat(prompt('Enter withdrawal amount ($):') || '0')
-    if (amount > 0 && amount <= user.balance) {
-      const updatedUser = { ...user, balance: user.balance - amount }
-      setUser(updatedUser)
-      localStorage.setItem('verdikt_user', JSON.stringify(updatedUser))
-      alert(`Successfully withdrew $${amount.toFixed(2)}`)
-    } else if (amount > user.balance) {
-      alert('Insufficient balance')
     }
   }
   
@@ -142,29 +128,21 @@ export default function PortfolioPage() {
           <div className="flex items-center gap-3 mt-2">
             <div className="flex items-center gap-2 text-gray-400">
               <User className="w-4 h-4" />
-              <span className="text-sm">{user.name}</span>
+              <span className="text-sm">{userName}</span>
             </div>
             <span className="text-xs text-gray-500">•</span>
-            <span className="text-sm text-gray-400">{user.email}</span>
+            <span className="text-sm text-gray-400">{userEmail}</span>
           </div>
         </div>
         
         <div className="flex items-center gap-3">
-          <div className="flex gap-2">
-            <button
-              onClick={handleDeposit}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-verdikt-blue text-white font-semibold text-sm hover:bg-blue-500 transition-colors shadow-lg shadow-blue-500/20"
-            >
-              <Plus className="w-4 h-4" />
-              Deposit
-            </button>
-            <button
-              onClick={handleWithdraw}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-verdikt-border text-gray-400 font-semibold text-sm hover:bg-white/5 hover:text-white transition-colors"
-            >
-              Withdraw
-            </button>
-          </div>
+          <button
+            onClick={handleDeposit}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-verdikt-blue text-white font-semibold text-sm hover:bg-blue-500 transition-colors shadow-lg shadow-blue-500/20"
+          >
+            <Plus className="w-4 h-4" />
+            Deposit Funds
+          </button>
           
           <button
             onClick={handleLogout}
@@ -183,7 +161,7 @@ export default function PortfolioPage() {
             <span className="text-sm text-gray-400">Balance</span>
           </div>
           <div className="text-3xl font-bold text-white">
-            ${user.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${userBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <p className="text-xs text-gray-500 mt-1">Available to trade</p>
         </div>
@@ -209,6 +187,7 @@ export default function PortfolioPage() {
         </div>
       </div>
 
+      {/* Rest of the portfolio page remains the same */}
       <div className="bg-verdikt-card border border-verdikt-border rounded-xl mb-6">
         <div className="p-5 border-b border-verdikt-border">
           <h2 className="font-bold text-white">Open Positions</h2>

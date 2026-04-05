@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import DesktopNav from '@/components/DesktopNav'
+import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -11,7 +11,25 @@ export const metadata: Metadata = {
   description: 'Trade on real-world event outcomes. Make your call on politics, finance, sports and more.',
 }
 
-
+function VerdiktLogo() {
+  return (
+    <Link href="/" className="flex items-center gap-2 group">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="8" fill="#3B82F6" fillOpacity="0.15"/>
+        <path
+          d="M6 8L13.5 24L16 19L18.5 24L26 8"
+          stroke="#3B82F6"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <span className="text-xl font-bold tracking-tight text-white group-hover:text-blue-400 transition-colors">
+        VERDIKT
+      </span>
+    </Link>
+  )
+}
 
 export default function RootLayout({
   children,
@@ -25,7 +43,53 @@ export default function RootLayout({
       </head>
       <body className="bg-verdikt-bg text-white min-h-screen flex flex-col">
         {/* Navigation */}
-        <DesktopNav />
+        <nav className="sticky top-0 z-50 border-b border-verdikt-border bg-verdikt-bg/90 backdrop-blur-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              {/* Logo */}
+              <VerdiktLogo />
+
+              {/* Nav Links */}
+              <div className="hidden md:flex items-center gap-8">
+                <Link
+                  href="/markets"
+                  className="text-sm text-gray-300 hover:text-white transition-colors font-medium"
+                >
+                  Markets
+                </Link>
+                <Link
+                  href="/how-it-works"
+                  className="text-sm text-gray-300 hover:text-white transition-colors font-medium"
+                >
+                  How it Works
+                </Link>
+                <Link
+                  href="/portfolio"
+                  className="text-sm text-gray-300 hover:text-white transition-colors font-medium"
+                >
+                  Portfolio
+                </Link>
+                <Link
+                  href="/sign-in"
+                  className="text-sm text-gray-300 hover:text-white transition-colors font-medium"
+                >
+                  Sign In
+                </Link>
+              </div>
+
+              {/* CTA */}
+              <div className="flex items-center gap-4">
+                <Link
+                  href="/sign-in"
+                  className="hidden md:inline-flex items-center px-4 py-2 rounded-lg bg-verdikt-blue text-white text-sm font-semibold hover:bg-blue-500 transition-colors shadow-lg shadow-blue-500/20"
+                >
+                  Get Started
+                </Link>
+                <MobileNav />
+              </div>
+            </div>
+          </div>
+        </nav>
 
         {/* Page Content */}
         <main className="flex-1">
@@ -38,21 +102,7 @@ export default function RootLayout({
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               {/* Brand */}
               <div className="md:col-span-2">
-                <Link href="/" className="flex items-center gap-2 group mb-4">
-                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="32" height="32" rx="8" fill="#3B82F6" fillOpacity="0.15"/>
-                    <path
-                      d="M6 8L13.5 24L16 19L18.5 24L26 8"
-                      stroke="#3B82F6"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <span className="text-xl font-bold tracking-tight text-white group-hover:text-blue-400 transition-colors">
-                    VERDIKT
-                  </span>
-                </Link>
+                <VerdiktLogo />
                 <p className="mt-3 text-sm text-gray-400 max-w-xs">
                   Make your call. Back it with real conviction.
                 </p>

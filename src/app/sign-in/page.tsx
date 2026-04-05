@@ -23,39 +23,24 @@ export default function SignInPage() {
     try {
       await new Promise(resolve => setTimeout(resolve, 300))
       
-      if (isSignUp) {
-        if (!name.trim()) {
-          setError('Name is required')
-          return
-        }
-        
-        const newUser = {
-          id: `user_${Date.now()}`,
-          email,
-          name,
-          balance: 1000.00,
-          createdAt: new Date().toISOString()
-        }
-        
-        localStorage.setItem('verdikt_user', JSON.stringify(newUser))
-        router.push('/portfolio')
-      } else {
-        if (password !== 'demo123') {
-          setError('Invalid password. Use "demo123" for demo')
-          return
-        }
-        
-        const user = {
-          id: `user_${Date.now()}`,
-          email,
-          name: email.split('@')[0],
-          balance: 1000.00,
-          createdAt: new Date().toISOString()
-        }
-        
-        localStorage.setItem('verdikt_user', JSON.stringify(user))
-        router.push('/portfolio')
+      // Simple validation
+      if (!email.includes('@')) {
+        setError('Please enter a valid email')
+        return
       }
+      
+      if (password !== 'demo123') {
+        setError('Invalid password. Use "demo123" for demo')
+        return
+      }
+      
+      // Store simple auth flag
+      localStorage.setItem('verdikt_authed', 'true')
+      localStorage.setItem('verdikt_user_email', email)
+      localStorage.setItem('verdikt_user_name', isSignUp ? name : email.split('@')[0])
+      localStorage.setItem('verdikt_user_balance', '1000.00')
+      
+      router.push('/portfolio')
     } catch (err) {
       setError('An unexpected error occurred')
     } finally {
