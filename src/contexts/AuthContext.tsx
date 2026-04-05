@@ -30,31 +30,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Check for stored user on mount
-    const storedUser = localStorage.getItem(CURRENT_USER_KEY)
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch (e) {
-        localStorage.removeItem(CURRENT_USER_KEY)
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem(CURRENT_USER_KEY)
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser))
+        } catch (e) {
+          localStorage.removeItem(CURRENT_USER_KEY)
+        }
       }
     }
     setIsLoading(false)
   }, [])
 
   const getMockUsers = (): Record<string, User> => {
-    const stored = localStorage.getItem(MOCK_USERS_KEY)
-    if (stored) {
-      try {
-        return JSON.parse(stored)
-      } catch (e) {
-        return {}
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(MOCK_USERS_KEY)
+      if (stored) {
+        try {
+          return JSON.parse(stored)
+        } catch (e) {
+          return {}
+        }
       }
     }
     return {}
   }
 
   const saveMockUsers = (users: Record<string, User>) => {
-    localStorage.setItem(MOCK_USERS_KEY, JSON.stringify(users))
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(MOCK_USERS_KEY, JSON.stringify(users))
+    }
   }
 
   const login = async (email: string, password: string) => {
@@ -76,7 +82,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       setUser(user)
-      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user))
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user))
+      }
       return { success: true }
     } catch (error) {
       return { success: false, error: 'Login failed' }
@@ -109,7 +117,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       saveMockUsers(users)
       
       setUser(newUser)
-      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser))
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser))
+      }
       return { success: true }
     } catch (error) {
       return { success: false, error: 'Signup failed' }
@@ -120,19 +130,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem(CURRENT_USER_KEY)
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(CURRENT_USER_KEY)
+    }
   }
 
   const updateBalance = (amount: number) => {
     if (user) {
       const updatedUser = { ...user, balance: user.balance + amount }
       setUser(updatedUser)
-      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser))
-      
-      // Also update in users storage
-      const users = getMockUsers()
-      users[user.id] = updatedUser
-      saveMockUsers(users)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser))
+        
+        // Also update in users storage
+        const users = getMockUsers()
+        users[user.id] = updatedUser
+        saveMockUsers(users)
+      }
     }
   }
 
