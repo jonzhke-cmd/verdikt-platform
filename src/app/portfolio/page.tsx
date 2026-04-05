@@ -1,133 +1,73 @@
-'use client'
-
-import { TrendingUp, TrendingDown, DollarSign, Plus, Clock, BarChart2, LogOut, User } from 'lucide-react'
+import { TrendingUp, TrendingDown, DollarSign, Plus, Clock, BarChart2 } from 'lucide-react'
 import Link from 'next/link'
-import { useAuth } from '@/contexts/AuthContext'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+
+const mockPositions = [
+  {
+    id: 1,
+    marketTitle: 'Will the Fed cut rates in June 2026?',
+    slug: 'fed-rate-cut-june-2026',
+    side: 'YES' as const,
+    shares: 150,
+    avgPrice: 58,
+    currentPrice: 67,
+    pnl: 13.50,
+  },
+  {
+    id: 2,
+    marketTitle: 'Will Bitcoin hit $120K by July 2026?',
+    slug: 'bitcoin-120k-july-2026',
+    side: 'NO' as const,
+    shares: 80,
+    avgPrice: 60,
+    currentPrice: 56,
+    pnl: 3.20,
+  },
+  {
+    id: 3,
+    marketTitle: 'Will Trump roll back >50% of tariffs by end of 2026?',
+    slug: 'trump-tariffs-rollback-2026',
+    side: 'NO' as const,
+    shares: 200,
+    avgPrice: 35,
+    currentPrice: 69,
+    pnl: 68.00,
+  },
+  {
+    id: 4,
+    marketTitle: 'Will Nvidia stock hit $200 by Q3 2026?',
+    slug: 'nvidia-200-q3-2026',
+    side: 'YES' as const,
+    shares: 100,
+    avgPrice: 48,
+    currentPrice: 52,
+    pnl: 4.00,
+  },
+]
+
+const mockActivity = [
+  { id: 1, action: 'Bought YES', market: 'Fed Rate Cut June 2026', amount: '$87.00', shares: 150, price: '58¢', date: 'Apr 1, 2026' },
+  { id: 2, action: 'Bought NO', market: 'Bitcoin $120K July 2026', amount: '$48.00', shares: 80, price: '60¢', date: 'Mar 29, 2026' },
+  { id: 3, action: 'Sold YES', market: 'US Recession 2026', amount: '$65.00', shares: 200, price: '33¢', date: 'Mar 25, 2026' },
+  { id: 4, action: 'Bought NO', market: 'Trump Tariffs Rollback', amount: '$70.00', shares: 200, price: '35¢', date: 'Mar 20, 2026' },
+  { id: 5, action: 'Bought YES', market: 'Nvidia $200 Q3 2026', amount: '$48.00', shares: 100, price: '48¢', date: 'Mar 15, 2026' },
+]
+
+const totalPnl = mockPositions.reduce((sum, p) => sum + p.pnl, 0)
+const balance = 1000.00
 
 export default function PortfolioPage() {
-  const { user, isLoading, logout } = useAuth()
-  const router = useRouter()
-  
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/sign-in')
-    }
-  }, [user, isLoading, router])
-  
-  if (isLoading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-verdikt-blue border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading portfolio...</p>
-        </div>
-      </div>
-    )
-  }
-  
-  if (!user) {
-    return null // Will redirect in useEffect
-  }
-  
-  // Mock positions data - in a real app, this would come from an API
-  const mockPositions = [
-    {
-      id: 1,
-      marketTitle: 'Will the Fed cut rates in June 2026?',
-      slug: 'fed-rate-cut-june-2026',
-      side: 'YES' as const,
-      shares: 150,
-      avgPrice: 58,
-      currentPrice: 67,
-      pnl: 13.50,
-    },
-    {
-      id: 2,
-      marketTitle: 'Will Bitcoin hit $120K by July 2026?',
-      slug: 'bitcoin-120k-july-2026',
-      side: 'NO' as const,
-      shares: 80,
-      avgPrice: 60,
-      currentPrice: 56,
-      pnl: 3.20,
-    },
-    {
-      id: 3,
-      marketTitle: 'Will Trump roll back >50% of tariffs by end of 2026?',
-      slug: 'trump-tariffs-rollback-2026',
-      side: 'NO' as const,
-      shares: 200,
-      avgPrice: 35,
-      currentPrice: 69,
-      pnl: 68.00,
-    },
-    {
-      id: 4,
-      marketTitle: 'Will Nvidia stock hit $200 by Q3 2026?',
-      slug: 'nvidia-200-q3-2026',
-      side: 'YES' as const,
-      shares: 100,
-      avgPrice: 48,
-      currentPrice: 52,
-      pnl: 4.00,
-    },
-  ]
-  
-  const mockActivity = [
-    { id: 1, action: 'Bought YES', market: 'Fed Rate Cut June 2026', amount: '$87.00', shares: 150, price: '58¢', date: 'Apr 1, 2026' },
-    { id: 2, action: 'Bought NO', market: 'Bitcoin $120K July 2026', amount: '$48.00', shares: 80, price: '60¢', date: 'Mar 29, 2026' },
-    { id: 3, action: 'Sold YES', market: 'US Recession 2026', amount: '$65.00', shares: 200, price: '33¢', date: 'Mar 25, 2026' },
-    { id: 4, action: 'Bought NO', market: 'Trump Tariffs Rollback', amount: '$70.00', shares: 200, price: '35¢', date: 'Mar 20, 2026' },
-    { id: 5, action: 'Bought YES', market: 'Nvidia $200 Q3 2026', amount: '$48.00', shares: 100, price: '48¢', date: 'Mar 15, 2026' },
-  ]
-  
-  const totalPnl = mockPositions.reduce((sum, p) => sum + p.pnl, 0)
-  
-  const handleLogout = () => {
-    logout()
-    router.push('/')
-  }
-  
-  const handleDeposit = () => {
-    // In a real app, this would open a payment modal
-    alert('Deposit functionality would be implemented here with Stripe/Payment integration')
-  }
-  
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+      <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white">Portfolio</h1>
-          <div className="flex items-center gap-3 mt-2">
-            <div className="flex items-center gap-2 text-gray-400">
-              <User className="w-4 h-4" />
-              <span className="text-sm">{user.name}</span>
-            </div>
-            <span className="text-xs text-gray-500">•</span>
-            <span className="text-sm text-gray-400">{user.email}</span>
-          </div>
+          <p className="text-gray-400 mt-1">Track your positions and performance</p>
         </div>
-        
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleDeposit}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-verdikt-blue text-white font-semibold text-sm hover:bg-blue-500 transition-colors shadow-lg shadow-blue-500/20"
-          >
-            <Plus className="w-4 h-4" />
-            Deposit Funds
-          </button>
-          
-          <button
-            onClick={handleLogout}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-verdikt-border text-gray-400 font-semibold text-sm hover:bg-white/5 hover:text-white transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            Sign Out
-          </button>
-        </div>
+        <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-verdikt-blue text-white font-semibold text-sm hover:bg-blue-500 transition-colors shadow-lg shadow-blue-500/20">
+          <Plus className="w-4 h-4" />
+          Deposit Funds
+        </button>
       </div>
 
       {/* Summary Cards */}
@@ -139,7 +79,7 @@ export default function PortfolioPage() {
             <span className="text-sm text-gray-400">Balance</span>
           </div>
           <div className="text-3xl font-bold text-white">
-            ${user.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <p className="text-xs text-gray-500 mt-1">Available to trade</p>
         </div>
@@ -274,9 +214,9 @@ export default function PortfolioPage() {
         </div>
       </div>
 
-      {/* Note */}
+      {/* Disclaimer */}
       <p className="text-xs text-gray-600 text-center mt-8">
-        Portfolio data is stored locally in your browser. Sign in on another device to see your account.
+        This is a demo portfolio. All figures are simulated for demonstration purposes only.
       </p>
     </div>
   )

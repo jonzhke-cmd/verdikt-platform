@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { AuthProvider } from '@/contexts/AuthContext'
-import NavClient from '@/components/NavClient'
+import Link from 'next/link'
+import MobileNav from '@/components/MobileNav'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -42,9 +42,54 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body className="bg-verdikt-bg text-white min-h-screen flex flex-col">
-        <AuthProvider>
-          {/* Navigation */}
-          <NavClient />
+        {/* Navigation */}
+        <nav className="sticky top-0 z-50 border-b border-verdikt-border bg-verdikt-bg/90 backdrop-blur-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              {/* Logo */}
+              <VerdiktLogo />
+
+              {/* Nav Links */}
+              <div className="hidden md:flex items-center gap-8">
+                <Link
+                  href="/markets"
+                  className="text-sm text-gray-300 hover:text-white transition-colors font-medium"
+                >
+                  Markets
+                </Link>
+                <Link
+                  href="/how-it-works"
+                  className="text-sm text-gray-300 hover:text-white transition-colors font-medium"
+                >
+                  How it Works
+                </Link>
+                <Link
+                  href="/portfolio"
+                  className="text-sm text-gray-300 hover:text-white transition-colors font-medium"
+                >
+                  Portfolio
+                </Link>
+                <Link
+                  href="/sign-in"
+                  className="text-sm text-gray-300 hover:text-white transition-colors font-medium"
+                >
+                  Sign In
+                </Link>
+              </div>
+
+              {/* CTA */}
+              <div className="flex items-center gap-4">
+                <Link
+                  href="/sign-in"
+                  className="hidden md:inline-flex items-center px-4 py-2 rounded-lg bg-verdikt-blue text-white text-sm font-semibold hover:bg-blue-500 transition-colors shadow-lg shadow-blue-500/20"
+                >
+                  Get Started
+                </Link>
+                <MobileNav />
+              </div>
+            </div>
+          </div>
+        </nav>
 
         {/* Page Content */}
         <main className="flex-1">

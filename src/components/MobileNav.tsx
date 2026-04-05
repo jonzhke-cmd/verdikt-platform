@@ -2,16 +2,19 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { X, Menu, User, LogOut } from "lucide-react";
+import { X, Menu } from "lucide-react";
 import { createPortal } from "react-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
+
+const navLinks = [
+  { href: "/markets", label: "Markets" },
+  { href: "/how-it-works", label: "How it Works" },
+  { href: "/portfolio", label: "Portfolio" },
+  { href: "/sign-in", label: "Sign In" },
+];
 
 export default function MobileNav() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const { user, logout } = useAuth();
-  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -21,19 +24,6 @@ export default function MobileNav() {
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
-
-  const handleLogout = () => {
-    logout();
-    router.push('/');
-    setOpen(false);
-  };
-
-  const navLinks = [
-    { href: "/markets", label: "Markets" },
-    { href: "/how-it-works", label: "How it Works" },
-    { href: "/portfolio", label: "Portfolio" },
-    ...(!user ? [{ href: "/sign-in", label: "Sign In" }] : []),
-  ];
 
   const overlay = open ? (
     <div
@@ -64,26 +54,6 @@ export default function MobileNav() {
         </button>
       </div>
 
-      {/* User info if logged in */}
-      {user && (
-        <div style={{ 
-          marginBottom: "32px", 
-          padding: "16px", 
-          backgroundColor: "#111827", 
-          borderRadius: "12px",
-          border: "1px solid #1F2937"
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
-            <User style={{ width: "20px", height: "20px", color: "#9CA3AF" }} />
-            <span style={{ fontSize: "16px", fontWeight: "bold", color: "white" }}>{user.name}</span>
-          </div>
-          <div style={{ fontSize: "14px", color: "#9CA3AF" }}>{user.email}</div>
-          <div style={{ fontSize: "14px", color: "#22C55E", marginTop: "4px" }}>
-            Balance: ${user.balance.toFixed(2)}
-          </div>
-        </div>
-      )}
-
       {/* Nav links */}
       <nav style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
         {navLinks.map((item) => (
@@ -105,49 +75,24 @@ export default function MobileNav() {
           </Link>
         ))}
 
-        {user ? (
-          <button
-            onClick={handleLogout}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-              marginTop: "32px",
-              padding: "18px",
-              fontSize: "18px",
-              fontWeight: "bold",
-              color: "#EF4444",
-              backgroundColor: "transparent",
-              border: "1px solid #EF4444",
-              borderRadius: "16px",
-              textAlign: "center",
-              cursor: "pointer",
-            }}
-          >
-            <LogOut style={{ width: "18px", height: "18px" }} />
-            Sign Out
-          </button>
-        ) : (
-          <Link
-            href="/sign-in"
-            onClick={() => setOpen(false)}
-            style={{
-              display: "block",
-              marginTop: "32px",
-              padding: "18px",
-              fontSize: "18px",
-              fontWeight: "bold",
-              color: "white",
-              backgroundColor: "#3B82F6",
-              borderRadius: "16px",
-              textAlign: "center",
-              textDecoration: "none",
-            }}
-          >
-            Get Started →
-          </Link>
-        )}
+        <Link
+          href="/sign-in"
+          onClick={() => setOpen(false)}
+          style={{
+            display: "block",
+            marginTop: "32px",
+            padding: "18px",
+            fontSize: "18px",
+            fontWeight: "bold",
+            color: "white",
+            backgroundColor: "#3B82F6",
+            borderRadius: "16px",
+            textAlign: "center",
+            textDecoration: "none",
+          }}
+        >
+          Get Started →
+        </Link>
       </nav>
     </div>
   ) : null;
