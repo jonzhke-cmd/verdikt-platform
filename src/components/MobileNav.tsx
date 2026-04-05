@@ -25,7 +25,10 @@ export default function MobileNav() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 top-16 z-40 bg-[#0A0F1E] flex flex-col px-6 pt-8 border-t border-white/10">
+        <div
+          className="fixed inset-x-0 top-16 bottom-0 z-50 flex flex-col px-6 pt-8"
+          style={{ backgroundColor: '#0A0F1E' }}
+        >
           <nav className="flex flex-col gap-2">
             {navLinks.map((item) => (
               <Link
@@ -40,7 +43,8 @@ export default function MobileNav() {
             <Link
               href="/sign-in"
               onClick={() => setOpen(false)}
-              className="mt-6 rounded-2xl bg-verdikt-blue px-6 py-4 text-center text-xl font-bold text-white hover:bg-blue-500 transition"
+              className="mt-6 rounded-2xl px-6 py-4 text-center text-xl font-bold text-white transition"
+              style={{ backgroundColor: '#3B82F6' }}
             >
               Get Started
             </Link>
