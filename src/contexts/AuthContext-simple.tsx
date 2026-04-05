@@ -2,36 +2,55 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
-const AuthContext = createContext(undefined)
+interface User {
+  id: string
+  email: string
+  name: string
+  balance: number
+  createdAt: string
+}
+
+interface AuthContextType {
+  user: User | null
+  isLoading: boolean
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
+  signup: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>
+  logout: () => void
+  updateBalance: (amount: number) => void
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    // Check for stored user on mount (client-side only)
     if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('verdikt_user')
+      const storedUser = localStorage.getItem('verdikt_current_user')
       if (storedUser) {
         try {
           setUser(JSON.parse(storedUser))
         } catch (e) {
-          localStorage.removeItem('verdikt_user')
+          localStorage.removeItem('verdikt_current_user')
         }
       }
     }
     setIsLoading(false)
   }, [])
 
-  const login = async (email, password) => {
+  const login = async (email: string, password: string) => {
     setIsLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 300))
+      await new Promise(resolve => setTimeout(resolve, 500))
       
+      // Simple mock auth
       if (password !== 'demo123') {
         return { success: false, error: 'Invalid password' }
       }
       
-      const newUser = {
+      const mockUser: User = {
         id: `user_${Date.now()}`,
         email,
         name: email.split('@')[0],
@@ -39,9 +58,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         createdAt: new Date().toISOString()
       }
       
-      setUser(newUser)
+      setUser(mockUser)
       if (typeof window !== 'undefined') {
-        localStorage.setItem('verdikt_user', JSON.stringify(newUser))
+        localStorage.setItem('verdikt_current_user', JSON.stringify(mockUser))
       }
       return { success: true }
     } catch (error) {
@@ -51,12 +70,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const signup = async (email, password, name) => {
+  const signup = async (email: string, password: string, name: string) => {
     setIsLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 300))
+      await new Promise(resolve => setTimeout(resolve, 500))
       
-      const newUser = {
+      const newUser: User = {
         id: `user_${Date.now()}`,
         email,
         name,
@@ -66,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       setUser(newUser)
       if (typeof window !== 'undefined') {
-        localStorage.setItem('verdikt_user', JSON.stringify(newUser))
+        localStorage.setItem('verdikt_current_user', JSON.stringify(newUser))
       }
       return { success: true }
     } catch (error) {
@@ -79,31 +98,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null)
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('verdikt_user')
+      localStorage.removeItem('verdikt_current_user')
     }
   }
 
-  const updateBalance = (amount) => {
+  const updateBalance = (amount: number) => {
     if (user) {
       const updatedUser = { ...user, balance: user.balance + amount }
       setUser(updatedUser)
       if (typeof window !== 'undefined') {
-        localStorage.setItem('verdikt_user', JSON.stringify(updatedUser))
+        localStorage.setItem('verdikt_current_user', JSON.stringify(updatedUser))
       }
     }
   }
 
-  const value = {
-    user,
-    isLoading,
-    login,
-    signup,
-    logout,
-    updateBalance
-  }
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, isLoading, login, signup, logout, updateBalance }}>
       {children}
     </AuthContext.Provider>
   )
